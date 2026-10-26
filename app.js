@@ -3,6 +3,17 @@ import { searchArtworks, searchArtists } from "./api.js";
 const container = document.getElementById("artworks-container");
 const searchForm = document.getElementById("search-form");
 
+const pagination = document.getElementById("pagination");
+const prevButton = document.getElementById("prev-page");
+const nextButton = document.getElementById("next-page");
+const pageInfo = document.getElementById("page-info");
+
+let currentPage = 1;
+let totalPages = 1;
+let currentQuery = "";
+let currentSearchType = "artworks";
+let requestId = 0;
+
 // Create a reusable Bootstrap card
 function createCard(title, content, imageUrl = null) {
   const column = document.createElement("div");
@@ -60,23 +71,57 @@ function createArtistCard(artist) {
   return createCard(artist.title, [dates]);
 }
 
+// Update pagination controls
+function updatePagination() {
+  pagination.classList.toggle("d-none", totalPages <= 1);
+
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+  prevButton.disabled = currentPage <= 1;
+  nextButton.disabled = currentPage >= totalPages;
+} 
+
 // Fetch and render search results
-async function renderResults(query, searchType) {
-  const isArtwork = searchType === "artworks";
+async function renderResults() {
+  const id = ++requestId;
+  const isArtwork = currentSearchType === "artworks";
 
-  const results = isArtwork
-    ? await searchArtworks(query)
-    : await searchArtists(query);
+  prevButton.disabled = true;
+  nextButton.disabled = true;
 
-  const cards = results.map(
-    isArtwork ? createArtworkCard : createArtistCard
-  );
+  try {
+    const { results, pagination: pageData } = isArtwork
+      ? await searchArtworks(currentQuery, currentPage)
+      : await searchArtists(currentQuery, currentPage);
 
-  container.replaceChildren(...cards);
+    // Ignore outdated requests
+    if (id !== requestId) return;
+
+    const cards = results.map(
+      isArtwork ? createArtworkCard : createArtistCard
+    );
+
+    container.replaceChildren(...cards);
+
+    if (results.length === 0) {
+      container.textContent = "No results found.";
+    }
+
+    currentPage = pageData.current_page;
+    totalPages = Math.max(1, pageData.total_pages);
+
+    updatePagination();
+  } catch (error) {
+    if (id !== requestId) return;
+
+    console.error("Search failed:", error);
+    container.textContent = "Failed to load results.";
+    pagination.classList.add("d-none");
+  }
 }
 
-// Handle search form submission
-searchForm.addEventListener("submit", async (event) => {
+// Handle search form
+searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const query = document.getElementById("search-input").value.trim();
@@ -84,10 +129,27 @@ searchForm.addEventListener("submit", async (event) => {
 
   if (!query) return;
 
-  try {
-    await renderResults(query, searchType);
-  } catch (error) {
-    console.error("Search failed:", error);
-  }
+  currentQuery = query;
+  currentSearchType = searchType;
+  currentPage = 1;
+  totalPages = 1;
+
+  pagination.classList.add("d-none");
+  renderResults();
 });
 
+// Previous page
+prevButton.addEventListener("click", () => {
+  if (currentPage <= 1) return;
+
+  currentPage--;
+  renderResults();
+});
+
+// Next page
+nextButton.addEventListener("click", () => {
+  if (currentPage >= totalPages) return;
+
+  currentPage++;
+  renderResults();
+});
