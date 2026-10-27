@@ -78,3 +78,48 @@ export async function searchArtists(query, page = 1) {
 
   return { results: artists, pagination };
 }
+
+export async function getArtworkById(id) {
+  if (!id) {
+    throw new Error("Artwork ID is required");
+  }
+
+  const params = new URLSearchParams({
+    fields: "id,title,artist_title,date_display,image_id,description,medium_display,dimensions",
+  });
+
+  const { data } = await fetchAPI(`artworks/${id}`, params);
+
+  return {
+    id: data.id,
+    title: data.title,
+    artist: data.artist_title,
+    date: data.date_display,
+    description: data.description,
+    medium: data.medium_display,
+    dimensions: data.dimensions,
+    imageUrl: data.image_id
+      ? `${IMAGE_URL}/${data.image_id}/full/843,/0/default.jpg`
+      : null,
+  };
+}
+
+export async function getArtistById(id) {
+  if (!id) {
+    throw new Error("Artist ID is required");
+  }
+
+  const params = new URLSearchParams({
+    fields: "id,title,birth_date,death_date,description",
+  });
+
+  const { data } = await fetchAPI(`artists/${id}`, params);
+
+  return {
+    id: data.id,
+    name: data.title,
+    birthDate: data.birth_date,
+    deathDate: data.death_date,
+    description: data.description,
+  };
+}

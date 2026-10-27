@@ -2,6 +2,8 @@ import { searchArtworks, searchArtists } from "./api.js";
 
 const container = document.getElementById("artworks-container");
 const searchForm = document.getElementById("search-form");
+const searchInput = document.getElementById("search-input");
+const searchTypeInput = document.getElementById("search-type");
 
 const pagination = document.getElementById("pagination");
 const prevButton = document.getElementById("prev-page");
@@ -15,7 +17,7 @@ let currentSearchType = "artworks";
 let requestId = 0;
 
 // Create a reusable Bootstrap card
-function createCard(title, content, imageUrl = null) {
+function createCard(title, content, detailsUrl, imageUrl = null) {
   const column = document.createElement("div");
   column.className = "col";
 
@@ -35,13 +37,18 @@ function createCard(title, content, imageUrl = null) {
   }
 
   const body = document.createElement("div");
-  body.className = "card-body";
+  body.className = "card-body d-flex flex-column";
 
   const heading = document.createElement("h5");
   heading.className = "card-title";
   heading.textContent = title;
 
-  body.append(heading, ...content);
+  const detailsLink = document.createElement("a");
+  detailsLink.className = "btn btn-outline-primary mt-auto";
+  detailsLink.href = detailsUrl;
+  detailsLink.textContent = "View Details";
+
+  body.append(heading, ...content, detailsLink);
   card.append(body);
   column.append(card);
 
@@ -55,10 +62,17 @@ function createArtworkCard(artwork) {
   artist.textContent = artwork.artist || "Unknown artist";
 
   const date = document.createElement("small");
-  date.className = "text-muted";
+  date.className = "text-muted mb-3";
   date.textContent = artwork.date || "";
 
-  return createCard(artwork.title, [artist, date], artwork.imageUrl);
+  const detailsUrl = `details.html?type=artwork&id=${artwork.id}`;
+
+  return createCard(
+    artwork.title,
+    [artist, date],
+    detailsUrl,
+    artwork.imageUrl
+  );
 }
 
 // Create an artist card
@@ -66,9 +80,15 @@ function createArtistCard(artist) {
   const dates = document.createElement("p");
   dates.className = "card-text text-muted";
   dates.textContent =
-    `${artist.birth_date ?? "?"} -  ${artist.death_date ?? "?"}`;
+    `${artist.birth_date ?? "?"} - ${artist.death_date ?? "?"}`;
 
-  return createCard(artist.title, [dates]);
+  const detailsUrl = `details.html?type=artist&id=${artist.id}`;
+
+  return createCard(
+    artist.title,
+    [dates],
+    detailsUrl
+  );
 }
 
 // Update pagination controls
@@ -79,7 +99,7 @@ function updatePagination() {
 
   prevButton.disabled = currentPage <= 1;
   nextButton.disabled = currentPage >= totalPages;
-} 
+}
 
 // Fetch and render search results
 async function renderResults() {
@@ -124,8 +144,8 @@ async function renderResults() {
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const query = document.getElementById("search-input").value.trim();
-  const searchType = document.getElementById("search-type").value;
+  const query = searchInput.value.trim();
+  const searchType = searchTypeInput.value;
 
   if (!query) return;
 
@@ -153,3 +173,17 @@ nextButton.addEventListener("click", () => {
   currentPage++;
   renderResults();
 });
+
+// Search automatically when redirected from details page
+const searchParams = new URLSearchParams(window.location.search);
+const initialSearch = searchParams.get("search");
+
+if (initialSearch) {
+  searchInput.value = initialSearch;
+  searchTypeInput.value = "artworks";
+
+  currentQuery = initialSearch;
+  currentSearchType = "artworks";
+
+  renderResults();
+}
