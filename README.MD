@@ -1,13 +1,15 @@
 # Art Explorer
 
-A simple web application for discovering artworks and artists using the Art Institute of Chicago API.
+Art Explorer is a simple web application for discovering artworks and artists using the Art Institute of Chicago API.
 
 ## Features
 
-- Browse artworks from the museum's collection
-- View artwork images and information
-- Search for artworks (planned)
-- Search for artists (planned)
+- Search for artworks
+- Search for artists
+- View artwork images and details
+- View artist information
+- Navigate to individual artwork details pages
+- Responsive design using Bootstrap
 
 ## Tech Stack
 
@@ -16,28 +18,34 @@ A simple web application for discovering artworks and artists using the Art Inst
 - JavaScript (Vanilla JS)
 - Bootstrap 5
 - Art Institute of Chicago API
+- GitHub Pages
 
-## API
+## Live Demo
 
-This project uses the free [Art Institute of Chicago API](https://api.artic.edu/docs/#introduction) to retrieve artwork information and images.
+[Art Explorer — GitHub Pages](https://ilyam70.github.io/art-explorer/)
 
-No API key is required.
+*Replace `USERNAME` with your GitHub username.*
 
 ## Getting Started
 
 1. Clone the repository.
 2. Open `index.html` in your browser.
-3. Explore the artworks.
+3. Start exploring artworks and artists.
+
+## API
+
+This project uses the [Art Institute of Chicago API](https://api.artic.edu/docs/#introduction) to retrieve artwork and artist information.
+
+No API key is required.
 
 ## Deployment
 
-The project will be deployed using GitHub Pages.
+The application is designed to be hosted on GitHub Pages.
 
 ## Project Status
 
-**Work in Progress** — Features and functionality are currently under development.
+**Work in Progress** — Core functionality is implemented. Further improvements are planned.
 
 ## Acknowledgments
 
 Artwork data and images are provided by the [Art Institute of Chicago](https://www.artic.edu/).
-
