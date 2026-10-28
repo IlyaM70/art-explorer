@@ -24,7 +24,6 @@ Art Explorer is a simple web application for discovering artworks and artists us
 
 [Art Explorer — GitHub Pages](https://ilyam70.github.io/art-explorer/)
 
-*Replace `USERNAME` with your GitHub username.*
 
 ## Getting Started
 
