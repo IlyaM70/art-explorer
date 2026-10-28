@@ -1,5 +1,8 @@
+
 import { searchArtworks, searchArtists } from "./api.js";
 
+const loading = document.getElementById("loading");
+const errorMessage = document.getElementById("error");
 const container = document.getElementById("artworks-container");
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -16,8 +19,23 @@ let currentQuery = "";
 let currentSearchType = "artworks";
 let requestId = 0;
 
-// Create a reusable Bootstrap card
-function createCard(title, content, detailsUrl, imageUrl = null) {
+function showLoading() {
+  loading.classList.remove("d-none");
+  errorMessage.classList.add("d-none");
+}
+
+function hideLoading() {
+  loading.classList.add("d-none");
+}
+
+function showError(message) {
+  hideLoading();
+  errorMessage.textContent = message;
+  errorMessage.classList.remove("d-none");
+}
+
+// Build a reusable Bootstrap card.
+function createCard(title, content, detailsUrl, imageUrl) {
   const column = document.createElement("div");
   column.className = "col";
 
@@ -32,7 +50,6 @@ function createCard(title, content, detailsUrl, imageUrl = null) {
     image.style.height = "220px";
     image.style.objectFit = "cover";
     image.referrerPolicy = "no-referrer";
-
     card.append(image);
   }
 
@@ -43,19 +60,18 @@ function createCard(title, content, detailsUrl, imageUrl = null) {
   heading.className = "card-title";
   heading.textContent = title;
 
-  const detailsLink = document.createElement("a");
-  detailsLink.className = "btn btn-outline-primary mt-auto";
-  detailsLink.href = detailsUrl;
-  detailsLink.textContent = "View Details";
+  const link = document.createElement("a");
+  link.className = "btn btn-outline-primary mt-auto";
+  link.href = detailsUrl;
+  link.textContent = "View Details";
 
-  body.append(heading, ...content, detailsLink);
+  body.append(heading, ...content, link);
   card.append(body);
   column.append(card);
 
   return column;
 }
 
-// Create an artwork card
 function createArtworkCard(artwork) {
   const artist = document.createElement("p");
   artist.className = "card-text";
@@ -65,47 +81,40 @@ function createArtworkCard(artwork) {
   date.className = "text-muted mb-3";
   date.textContent = artwork.date || "";
 
-  const detailsUrl = `details.html?type=artwork&id=${artwork.id}`;
-
   return createCard(
     artwork.title,
     [artist, date],
-    detailsUrl,
+    `details.html?type=artwork&id=${artwork.id}`,
     artwork.imageUrl
   );
 }
 
-// Create an artist card
 function createArtistCard(artist) {
   const dates = document.createElement("p");
   dates.className = "card-text text-muted";
-  dates.textContent =
-    `${artist.birth_date ?? "?"} - ${artist.death_date ?? "?"}`;
-
-  const detailsUrl = `details.html?type=artist&id=${artist.id}`;
+  dates.textContent = `${artist.birth_date ?? "?"} - ${artist.death_date ?? "?"}`;
 
   return createCard(
     artist.title,
     [dates],
-    detailsUrl
+    `details.html?type=artist&id=${artist.id}`
   );
 }
 
-// Update pagination controls
 function updatePagination() {
   pagination.classList.toggle("d-none", totalPages <= 1);
-
   pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-
   prevButton.disabled = currentPage <= 1;
   nextButton.disabled = currentPage >= totalPages;
 }
 
-// Fetch and render search results
 async function renderResults() {
   const id = ++requestId;
   const isArtwork = currentSearchType === "artworks";
 
+  showLoading();
+  container.replaceChildren();
+  pagination.classList.add("d-none");
   prevButton.disabled = true;
   nextButton.disabled = true;
 
@@ -114,16 +123,16 @@ async function renderResults() {
       ? await searchArtworks(currentQuery, currentPage)
       : await searchArtists(currentQuery, currentPage);
 
-    // Ignore outdated requests
+    // Prevent older requests from replacing newer results.
     if (id !== requestId) return;
 
-    const cards = results.map(
-      isArtwork ? createArtworkCard : createArtistCard
-    );
+    if (results.length) {
+      const createResultCard = isArtwork
+        ? createArtworkCard
+        : createArtistCard;
 
-    container.replaceChildren(...cards);
-
-    if (results.length === 0) {
+      container.replaceChildren(...results.map(createResultCard));
+    } else {
       container.textContent = "No results found.";
     }
 
@@ -131,34 +140,32 @@ async function renderResults() {
     totalPages = Math.max(1, pageData.total_pages);
 
     updatePagination();
-  } catch (error) {
+  } catch (err) {
     if (id !== requestId) return;
 
-    console.error("Search failed:", error);
-    container.textContent = "Failed to load results.";
-    pagination.classList.add("d-none");
+    console.error("Search failed:", err);
+    showError("Failed to load results. Please try again.");
+  } finally {
+    if (id === requestId) {
+      hideLoading();
+    }
   }
 }
 
-// Handle search form
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const query = searchInput.value.trim();
-  const searchType = searchTypeInput.value;
-
   if (!query) return;
 
   currentQuery = query;
-  currentSearchType = searchType;
+  currentSearchType = searchTypeInput.value;
   currentPage = 1;
   totalPages = 1;
 
-  pagination.classList.add("d-none");
   renderResults();
 });
 
-// Previous page
 prevButton.addEventListener("click", () => {
   if (currentPage <= 1) return;
 
@@ -166,7 +173,6 @@ prevButton.addEventListener("click", () => {
   renderResults();
 });
 
-// Next page
 nextButton.addEventListener("click", () => {
   if (currentPage >= totalPages) return;
 
@@ -174,16 +180,11 @@ nextButton.addEventListener("click", () => {
   renderResults();
 });
 
-// Search automatically when redirected from details page
-const searchParams = new URLSearchParams(window.location.search);
-const initialSearch = searchParams.get("search");
+// Restore a search when returning from the details page.
+const initialSearch = new URLSearchParams(window.location.search).get("search");
 
 if (initialSearch) {
   searchInput.value = initialSearch;
-  searchTypeInput.value = "artworks";
-
   currentQuery = initialSearch;
-  currentSearchType = "artworks";
-
   renderResults();
 }

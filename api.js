@@ -1,4 +1,3 @@
-
 const API_URL = "https://api.artic.edu/api/v1";
 const IMAGE_URL = "https://www.artic.edu/iiif/2";
 const PAGE_SIZE = 9;

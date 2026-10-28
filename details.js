@@ -1,3 +1,4 @@
+
 import { getArtworkById, getArtistById } from "./api.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -5,81 +6,70 @@ const type = params.get("type");
 const id = params.get("id");
 
 const loading = document.getElementById("loading");
-const errorElement = document.getElementById("error");
+const errorMessage = document.getElementById("error");
 const details = document.getElementById("details");
 
 const imageColumn = document.getElementById("image-column");
 const imageElement = document.getElementById("detail-image");
-const contentColumn = document.getElementById("content-column");
-
 const titleElement = document.getElementById("detail-title");
 const metadataElement = document.getElementById("detail-metadata");
 const descriptionElement = document.getElementById("detail-description");
-const moreAuthorBtn = document.getElementById("more-author-btn");
+const moreAuthorButton = document.getElementById("more-author-btn");
 
-// Build metadata
+function showLoading() {
+  loading.classList.remove("d-none");
+  errorMessage.classList.add("d-none");
+  details.classList.add("d-none");
+}
+
+function hideLoading() {
+  loading.classList.add("d-none");
+}
+
+function showError(message) {
+  hideLoading();
+  errorMessage.textContent = message;
+  errorMessage.classList.remove("d-none");
+}
+
 function addMetadata(label, value) {
   if (!value) return;
 
   const paragraph = document.createElement("p");
   paragraph.className = "mb-2";
 
-  const strong = document.createElement("strong");
-  strong.textContent = `${label}: `;
+  const labelElement = document.createElement("strong");
+  labelElement.textContent = `${label}: `;
 
-  paragraph.append(strong, document.createTextNode(value));
-  metadataElement.appendChild(paragraph);
+  paragraph.append(labelElement, document.createTextNode(value));
+  metadataElement.append(paragraph);
 }
 
-// Display description
 function setDescription(html) {
-  descriptionElement.replaceChildren();
-
-  if (!html) return;
-
-  const text = new DOMParser()
-    .parseFromString(html, "text/html")
-    .body.textContent;
-
-  const paragraph = document.createElement("p");
-  paragraph.textContent = text;
-
-  descriptionElement.appendChild(paragraph);
+  descriptionElement.innerHTML = html || "";
 }
 
-// Show artwork image
 function showImage(imageUrl, title) {
-  if (!imageUrl) {
-    imageColumn.classList.add("d-none");
-    return;
-  }
+  imageColumn.classList.toggle("d-none", !imageUrl);
+
+  if (!imageUrl) return;
 
   imageElement.src = imageUrl;
   imageElement.alt = title || "Artwork";
   imageElement.referrerPolicy = "no-referrer";
-
-  imageColumn.classList.remove("d-none");
 }
 
-// Setup author search button
 function setupAuthorButton(artistName) {
-  if (!artistName) {
-    moreAuthorBtn.classList.add("d-none");
-    return;
-  }
+  moreAuthorButton.classList.toggle("d-none", !artistName);
 
-  moreAuthorBtn.classList.remove("d-none");
+  if (!artistName) return;
 
-  moreAuthorBtn.onclick = () => {
-    const params = new URLSearchParams({
-      search: artistName
-    });
-
+  moreAuthorButton.onclick = () => {
+    const params = new URLSearchParams({ search: artistName });
     window.location.href = `index.html?${params}`;
   };
 }
 
-// Render artwork
 function renderArtwork(artwork) {
   titleElement.textContent = artwork.title || "Untitled";
 
@@ -87,14 +77,12 @@ function renderArtwork(artwork) {
   addMetadata("Date", artwork.date);
   addMetadata("Medium", artwork.medium);
   addMetadata("Dimensions", artwork.dimensions);
-
+  
   setDescription(artwork.description);
   showImage(artwork.imageUrl, artwork.title);
-
   setupAuthorButton(artwork.artist);
 }
 
-// Render artist
 function renderArtist(artist) {
   titleElement.textContent = artist.name || "Unknown Artist";
 
@@ -103,23 +91,17 @@ function renderArtist(artist) {
 
   setDescription(artist.description);
   showImage(null);
-
   setupAuthorButton(artist.name);
 }
 
-// Show error
-function showError(message) {
-  errorElement.textContent = message;
-  errorElement.classList.remove("d-none");
-}
-
-// Initialize details page
 async function loadDetails() {
+  showLoading();
+
   if (
-    !["artwork", "artist"].includes(type) ||
-    !/^\d+$/.test(id || "")
+    (type !== "artwork" && type !== "artist") ||
+    !id ||
+    isNaN(Number(id))
   ) {
-    loading.classList.add("d-none");
     showError("Invalid details URL.");
     return;
   }
@@ -133,9 +115,6 @@ async function loadDetails() {
       throw new Error("Item not found.");
     }
 
-    metadataElement.replaceChildren();
-    descriptionElement.replaceChildren();
-
     if (type === "artwork") {
       renderArtwork(item);
     } else {
@@ -143,13 +122,11 @@ async function loadDetails() {
     }
 
     details.classList.remove("d-none");
-
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error("Failed to load details:", err);
     showError("Could not load details. Please try again.");
-
   } finally {
-    loading.classList.add("d-none");
+    hideLoading();
   }
 }
 
