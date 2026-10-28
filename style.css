@@ -1,0 +1,239 @@
+/* Art Explorer — Art book theme */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+:root {
+  --bs-body-bg: #f5f1e8;
+  --bs-body-color: #292820;
+  --bs-primary: #793c42;
+  --bs-primary-rgb: 121, 60, 66;
+  --bs-secondary: #777367;
+  --bs-secondary-rgb: 119, 115, 103;
+  --bs-border-color: #ded7c9;
+  --bs-link-color: #793c42;
+  --bs-link-hover-color: #54292e;
+  --bs-border-radius: 0.35rem;
+  --bs-border-radius-lg: 0.5rem;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5,
+.navbar-brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation */
+
+.navbar,
+footer {
+  background-color: #eae3d6 !important;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--bs-border-color);
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-size: 1.6rem;
+  color: var(--bs-primary);
+}
+
+footer {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+/* Search */
+
+.form-control,
+.form-select {
+  background-color: #fffdf8;
+  border-color: var(--bs-border-color);
+  padding: 0.75rem 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #fffdf8;
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.12);
+}
+
+/* Buttons */
+
+.btn {
+  border-radius: 0.3rem;
+  padding: 0.65rem 1.1rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: #54292e;
+  --bs-btn-hover-border-color: #54292e;
+  --bs-btn-active-bg: #54292e;
+  --bs-btn-active-border-color: #54292e;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #fffdf8;
+}
+
+.detail-actions .btn:focus,
+.detail-actions .btn:active:focus {
+  box-shadow: 0 0 0 0.2rem rgba(121, 60, 66, 0.2);
+}
+
+.detail-actions .btn:active,
+.detail-actions .btn:active:focus {
+  background-color: #54292e;
+  border-color: #54292e;
+  box-shadow: none;
+}
+
+.detail-actions .btn-outline-primary:active {
+  color: #fffdf8;
+}
+
+.detail-actions .btn:active {
+  background-color: #54292e !important;
+  border-color: #54292e !important;
+  color: #fffdf8 !important;
+  box-shadow: none !important;
+}
+
+/* Artwork and artist cards */
+
+.card {
+  background-color: #fffdf8;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(41, 40, 32, 0.08);
+}
+
+.card-img-top {
+  border-radius: 0;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.card-text,
+.text-muted {
+  color: #777367 !important;
+}
+
+/* Artwork details */
+
+#details {
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+#image-column {
+  text-align: center;
+}
+
+#detail-image {
+  max-height: 70vh;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  border-radius: 0 !important;
+}
+
+#detail-title {
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 2rem !important;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+#detail-metadata,
+#detail-description {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+#detail-description {
+  line-height: 1.8;
+}
+
+#detail-description a {
+  color: var(--bs-link-color);
+}
+
+.detail-actions {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* Footer */
+
+footer.bg-body-tertiary {
+background-color: #eae3d6 !important;
+border-top: 1px solid var(--bs-border-color);
+}
+
+footer a {
+color: var(--bs-primary);
+}
+
+/* Disabled pagination buttons */
+
+#pagination .btn:disabled {
+background-color: #e8e2d8;
+border-color: #d6cebf;
+color: #9b9488;
+opacity: 1;
+cursor: not-allowed;
+}
+
+/* Small screens */
+
+@media (max-width: 576px) {
+  main.container {
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+}

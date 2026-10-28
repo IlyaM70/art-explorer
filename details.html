@@ -21,9 +21,6 @@
   </nav>
 
   <main class="container my-5 flex-grow-1">
-    <a href="index.html" class="btn btn-outline-secondary mb-4">
-      Back to Search
-    </a>
 
     <div id="loading" class="text-center">
       Loading details...
@@ -41,9 +38,15 @@
         <div id="detail-metadata" class="mb-4"></div>
         <div id="detail-description" class="mb-4"></div>
 
-        <button id="more-author-btn" class="btn btn-primary" type="button">
-          More of this author
-        </button>
+        <div class="detail-actions d-flex flex-wrap gap-2">
+          <a href="index.html" class="btn btn-outline-primary">
+            Back to Search
+          </a>
+
+          <button id="more-author-btn" class="btn btn-primary" type="button">
+            More of this author
+          </button>
+        </div>
       </div>
     </section>
   </main>
