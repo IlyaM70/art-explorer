@@ -204,6 +204,18 @@ nextButton.addEventListener("click", () => {
   renderResults();
 });
 
+container.addEventListener("click", (event) => {
+  const link = event.target.closest("a");
+
+  if (!link || !link.href.includes("details.html")) return;
+
+  sessionStorage.setItem("artExplorerScroll", JSON.stringify({
+    search: currentQuery,
+    searchType: currentSearchType,
+    page: currentPage,
+    scrollY: window.scrollY
+  }));
+});
 
 // Restore search state from the URL.
 const params = new URLSearchParams(window.location.search);
@@ -225,5 +237,28 @@ if (initialSearch) {
     ? initialPage
     : 1;
 
-  renderResults();
+  renderResults()
 }
+
+// Restore the previous search results page and scroll position when returning from artwork or artist details.
+async function restoreSearchState() {
+  await renderResults();
+
+  const saved = sessionStorage.getItem("artExplorerScroll");
+
+  if (!saved) return;
+
+  const position = JSON.parse(saved);
+
+  if (
+    position.search === currentQuery &&
+    position.searchType === currentSearchType &&
+    position.page === currentPage
+  ) {
+    window.scrollTo(0, position.scrollY);
+  }
+
+  sessionStorage.removeItem("artExplorerScroll");
+}
+
+restoreSearchState();
