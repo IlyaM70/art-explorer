@@ -12,6 +12,8 @@ const pagination = document.getElementById("pagination");
 const prevButton = document.getElementById("prev-page");
 const nextButton = document.getElementById("next-page");
 const pageInfo = document.getElementById("page-info");
+const pageInput = document.getElementById("page-input");
+const goToPageButton = document.getElementById("go-to-page");
 
 let currentPage = 1;
 let totalPages = 1;
@@ -117,6 +119,10 @@ function createArtistCard(artist) {
 function updatePagination() {
   pagination.classList.toggle("d-none", totalPages <= 1);
   pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+  pageInput.value = currentPage;
+  pageInput.max = totalPages;
+
   prevButton.disabled = currentPage <= 1;
   nextButton.disabled = currentPage >= totalPages;
 }
@@ -201,6 +207,20 @@ nextButton.addEventListener("click", () => {
   if (currentPage >= totalPages) return;
 
   currentPage++;
+  renderResults();
+});
+
+goToPageButton.addEventListener("click", () => {
+  const page = Number(pageInput.value);
+
+  if (!Number.isInteger(page) || page < 1 || page > totalPages) {
+    pageInput.value = currentPage;
+    return;
+  }
+
+  if (page === currentPage) return;
+
+  currentPage = page;
   renderResults();
 });
 
