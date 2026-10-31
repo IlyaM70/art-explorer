@@ -16,6 +16,16 @@ const metadataElement = document.getElementById("detail-metadata");
 const descriptionElement = document.getElementById("detail-description");
 const moreAuthorButton = document.getElementById("more-author-btn");
 
+const backToSearch = document.getElementById("back-to-search");
+
+const searchParams = new URLSearchParams({
+  search: params.get("search") || "",
+  searchType: params.get("searchType") || "artworks",
+  page: params.get("page") || "1"
+});
+
+backToSearch.href = `index.html?${searchParams}`;
+
 function showLoading() {
   loading.classList.remove("d-none");
   errorMessage.classList.add("d-none");
@@ -65,9 +75,15 @@ function setupAuthorButton(artistName) {
   if (!artistName) return;
 
   moreAuthorButton.onclick = () => {
-    const params = new URLSearchParams({ search: artistName });
-    window.location.href = `index.html?${params}`;
-  };
+  const params = new URLSearchParams({
+    search: artistName,
+    searchType: "artworks",
+    page: "1"
+  });
+
+  window.location.href = `index.html?${params}`;
+};
+
 }
 
 function renderArtwork(artwork) {

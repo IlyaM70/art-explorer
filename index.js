@@ -19,6 +19,7 @@ let currentQuery = "";
 let currentSearchType = "artworks";
 let requestId = 0;
 
+
 function showLoading() {
   loading.classList.remove("d-none");
   errorMessage.classList.add("d-none");
@@ -72,6 +73,18 @@ function createCard(title, content, detailsUrl, imageUrl) {
   return column;
 }
 
+function createDetailsUrl(type, id) {
+  const params = new URLSearchParams({
+    type,
+    id,
+    search: currentQuery,
+    searchType: currentSearchType,
+    page: currentPage
+  });
+
+  return `details.html?${params}`;
+}
+
 function createArtworkCard(artwork) {
   const artist = document.createElement("p");
   artist.className = "card-text";
@@ -84,7 +97,7 @@ function createArtworkCard(artwork) {
   return createCard(
     artwork.title,
     [artist, date],
-    `details.html?type=artwork&id=${artwork.id}`,
+    createDetailsUrl("artwork", artwork.id),
     artwork.imageUrl
   );
 }
@@ -97,7 +110,7 @@ function createArtistCard(artist) {
   return createCard(
     artist.title,
     [dates],
-    `details.html?type=artist&id=${artist.id}`
+    createDetailsUrl("artist", artist.id)
   );
 }
 
@@ -106,6 +119,16 @@ function updatePagination() {
   pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
   prevButton.disabled = currentPage <= 1;
   nextButton.disabled = currentPage >= totalPages;
+}
+
+function updateSearchUrl() {
+  const params = new URLSearchParams({
+    search: currentQuery,
+    searchType: currentSearchType,
+    page: String(currentPage)
+  });
+
+  history.replaceState(null, "", `?${params.toString()}`);
 }
 
 async function renderResults() {
@@ -139,6 +162,7 @@ async function renderResults() {
     currentPage = pageData.current_page;
     totalPages = Math.max(1, pageData.total_pages);
 
+    updateSearchUrl();
     updatePagination();
   } catch (err) {
     if (id !== requestId) return;
@@ -180,11 +204,26 @@ nextButton.addEventListener("click", () => {
   renderResults();
 });
 
-// Restore a search when returning from the details page.
-const initialSearch = new URLSearchParams(window.location.search).get("search");
+
+// Restore search state from the URL.
+const params = new URLSearchParams(window.location.search);
+
+const initialSearch = params.get("search");
+const initialType = params.get("searchType");
+const initialPage = Number(params.get("page"));
 
 if (initialSearch) {
   searchInput.value = initialSearch;
   currentQuery = initialSearch;
+
+  if (initialType === "artworks" || initialType === "artists") {
+    currentSearchType = initialType;
+  }
+
+  searchTypeInput.value = currentSearchType;
+  currentPage = Number.isInteger(initialPage) && initialPage > 0
+    ? initialPage
+    : 1;
+
   renderResults();
 }
