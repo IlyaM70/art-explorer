@@ -46,6 +46,8 @@ art-explorer/
 
 ### 1. Clone the repository
 
+Use any comand-line interface of your choise.
+
 ```bash
 git clone https://github.com/IlyaM70/art-explorer.git
 ```
