@@ -1,6 +1,9 @@
 
 import { searchArtworks, searchArtists } from "./api.js";
 
+// Art Institute API limits the number of accessible search results.
+const MAX_ACCESSIBLE_PAGE = 100;
+
 const loading = document.getElementById("loading");
 const errorMessage = document.getElementById("error");
 const container = document.getElementById("artworks-container");
@@ -121,7 +124,7 @@ function updatePagination() {
   pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 
   pageInput.value = currentPage;
-  pageInput.max = totalPages;
+  pageInput.max = Math.min(totalPages, MAX_ACCESSIBLE_PAGE);
 
   prevButton.disabled = currentPage <= 1;
   nextButton.disabled = currentPage >= totalPages;
@@ -165,8 +168,8 @@ async function renderResults() {
       container.textContent = "No results found.";
     }
 
-    currentPage = pageData.current_page;
-    totalPages = Math.max(1, pageData.total_pages);
+    totalPages = Math.min(pageData.total_pages, MAX_ACCESSIBLE_PAGE);
+    currentPage = Math.min(pageData.current_page, totalPages);
 
     updateSearchUrl();
     updatePagination();
@@ -213,7 +216,12 @@ nextButton.addEventListener("click", () => {
 goToPageButton.addEventListener("click", () => {
   const page = Number(pageInput.value);
 
-  if (!Number.isInteger(page) || page < 1 || page > totalPages) {
+  if (
+    !Number.isInteger(page) ||
+    page < 1 ||
+    page > totalPages ||
+    page > MAX_ACCESSIBLE_PAGE
+  ) {
     pageInput.value = currentPage;
     return;
   }
@@ -223,7 +231,6 @@ goToPageButton.addEventListener("click", () => {
   currentPage = page;
   renderResults();
 });
-
 container.addEventListener("click", (event) => {
   const link = event.target.closest("a");
 
